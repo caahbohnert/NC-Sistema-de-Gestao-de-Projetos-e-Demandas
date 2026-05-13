@@ -20,10 +20,22 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  async function handleLogin() {
-    await login(email, password);
-    navigate("/dashboard");
+async function handleLogin() {
+  if (!email || !password) {
+    alert("Preencha os campos obrigatórios.");
+    return;
   }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    alert("Digite um e-mail válido.");
+    return;
+  }
+
+  await login(email, password);
+  navigate("/dashboard");
+}
 
   return (
     <Box
@@ -58,6 +70,7 @@ export function LoginPage() {
           fullWidth
           margin="normal"
           value={email}
+          required
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -68,6 +81,7 @@ export function LoginPage() {
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

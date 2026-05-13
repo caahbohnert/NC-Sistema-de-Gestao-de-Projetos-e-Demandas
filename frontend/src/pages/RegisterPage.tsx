@@ -28,6 +28,17 @@ export function RegisterPage() {
 
   async function handleRegister() {
     try {
+        if (!nome || !email || !senha) {
+          alert('Preencha os campos obrigatórios.');
+          return;
+        }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        alert("Digite um e-mail válido.");
+        return;
+      }
+
       if (senha !== confirmPassword) {
         alert('As senhas não coincidem.');
         return;
@@ -74,13 +85,15 @@ export function RegisterPage() {
             label="Nome"
             fullWidth
             value={nome}
+            required
             onChange={(e) => setNome(e.target.value)}
           />
 
           <TextField
-            label="Email"
+            label="E-mail"
             type="email"
             fullWidth
+            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -90,6 +103,7 @@ export function RegisterPage() {
             type={showSenha ? 'text' : 'password'}
             fullWidth
             value={senha}
+            required
             onChange={(e) => setSenha(e.target.value)}
             InputProps={{
               endAdornment: (
@@ -110,6 +124,7 @@ export function RegisterPage() {
             type={showConfirm ? 'text' : 'password'}
             fullWidth
             value={confirmPassword}
+            required
             onChange={(e) => setConfirmPassword(e.target.value)}
             InputProps={{
               endAdornment: (
