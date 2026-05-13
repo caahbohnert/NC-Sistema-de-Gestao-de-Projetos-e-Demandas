@@ -33,7 +33,11 @@ async function handleLogin() {
     return;
   }
 
-  await login(email, password);
+  try{
+    await login(email, password);
+  } catch{
+    alert("E-mail ou senha inválidos")
+  }
   navigate("/dashboard");
 }
 

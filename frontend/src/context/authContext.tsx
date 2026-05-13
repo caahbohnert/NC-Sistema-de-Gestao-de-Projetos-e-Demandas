@@ -5,7 +5,7 @@ import { useAuthService } from '../services/authService';
 interface Usuario {
   id: string;
   email: string;
-  nome: string;
+  name: string;
 }
 
 interface AuthContextProps {
@@ -19,14 +19,13 @@ interface AuthContextProps {
 
 function getUserFromToken(token: string): Usuario | null {
   try {
-    const decoded = jwtDecode<{ sub: string; email: string; nome?: string }>(
+    const decoded = jwtDecode<{ sub: string; email: string; name?: string }>(
       token,
     );
-
     return {
       id: decoded.sub,
       email: decoded.email,
-      nome: decoded.nome ?? 'Usuário',
+      name: decoded.name ?? 'Usuário',
     };
   } catch {
     return null;

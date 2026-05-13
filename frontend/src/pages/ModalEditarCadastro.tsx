@@ -16,7 +16,7 @@ import { useAuth } from '../context/authContext';
 interface Props {
   open: boolean;
   onClose: () => void;
-  usuario: { id: string; nome: string; email: string } | null;
+  usuario: { id: string; name: string; email: string } | null;
   onAtualizado?: (novoNome: string) => void;
 }
 
@@ -37,7 +37,7 @@ export function ModalEditarCadastro({
 
   useEffect(() => {
     if (usuario) {
-      setNome(usuario.nome);
+      setNome(usuario.name);
       setEmail(usuario.email);
       setSenha('');
       setErro(null);

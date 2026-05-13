@@ -78,7 +78,7 @@ export function DashboardPage() {
   }, [projetoAtivo]);
 
   function handleAbrirEditarCadastro() {
-    setCadastroNome(user?.nome ?? '');
+    setCadastroNome(user?.name ?? '');
     setCadastroEmail(user?.email ?? '');
     setCadastroSenha('');
     setCadastroErro(null);
@@ -101,7 +101,7 @@ export function DashboardPage() {
       await api.put(`/usuarios/${user.id}`, dto);
 
       updateUser({
-        nome: cadastroNome,
+        name: cadastroNome,
         email: cadastroEmail,
       });
 
@@ -259,7 +259,7 @@ export function DashboardPage() {
               }}
               onClick={handleAbrirEditarCadastro}
             >
-              {user?.nome?.[0]?.toUpperCase() ?? 'U'}{' '}
+              {user?.name?.[0]?.toUpperCase() ?? 'U'}{' '}
             </Avatar>
           </Tooltip>
           <Typography
@@ -269,7 +269,7 @@ export function DashboardPage() {
             sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}
             onClick={handleAbrirEditarCadastro}
           >
-            {user?.nome ?? 'Usuário'}{' '}
+            {user?.name ?? 'Usuário'}{' '}
           </Typography>
           <Tooltip title="Sair">
             <IconButton
