@@ -32,8 +32,16 @@ export class ProjetoService {
         return this.projetoRepository.save(projeto);
     }
 
-    async listarProjetos(idCriador: string): Promise<Projeto[]> {
-        return this.projetoRepository.find({ where: { idCriador } });
+    async listarProjetos(idUsuario: string): Promise<Projeto[]> {
+    const comoMembro = await this.projetoRepository
+        .createQueryBuilder('projeto')
+        .leftJoin('tarefas', 'tarefa', 'tarefa.idProjeto = projeto.id')
+        .where('projeto.idCriador = :idUsuario', { idUsuario })
+        .orWhere('tarefa.idResponsavel = :idUsuario', { idUsuario })
+        .distinct(true)
+        .getMany();
+
+    return comoMembro;
     }
 
     async buscarPorId(id: string): Promise<Projeto> {

@@ -39,4 +39,8 @@ export class TarefaService {
       .orderBy('tarefa.dataCriacao', 'DESC')
       .getMany();
   }
+
+  async listarTarefasPorResponsavel(idResponsavel: string): Promise<Tarefa[]> {
+    return this.tarefaRepository.find({ where: { idResponsavel } });
+  }
 }

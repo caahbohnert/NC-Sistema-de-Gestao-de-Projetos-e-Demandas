@@ -15,6 +15,8 @@ export interface Tarefa {
   idProjeto: string;
   dataLimite?: string;
   linkMr?: string;
+  idResponsavel?: string;
+  nomeResponsavel?: string;
 }
 
 export type Status = "PENDENTE" | "EM_ANDAMENTO" | "CONCLUIDA" | "CANCELADA";

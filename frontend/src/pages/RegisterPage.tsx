@@ -49,6 +49,11 @@ export function RegisterPage() {
         return;
       }
 
+    if (nome.length < 4) {
+      alert('O nome deve ter no mínimo 4 caracteres.');
+      return;
+    }
+
       await register({ nome, email, senha });
       await login(email, senha);
 

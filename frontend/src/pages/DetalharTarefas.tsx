@@ -21,6 +21,7 @@ import {
   Timelapse,
   Cancel,
   FolderOutlined,
+  PersonOutlined,
 } from "@mui/icons-material";
 import type { Tarefa, Status, Projeto } from "../types";
 
@@ -78,6 +79,12 @@ function formatDate(dateStr?: string) {
   });
 }
 
+function normalizarUrl(url: string): string {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return `https://${url}`;
+  }
+  return url;
+}
 function InfoRow({
   icon,
   label,
@@ -260,12 +267,23 @@ export function ModalDetalhesTarefa({ open, tarefa, projeto, onClose, onEditar }
           </Typography>
         </InfoRow>
 
+        {tarefa.idResponsavel && (
+          <>
+            <Divider />
+            <InfoRow icon={<PersonOutlined sx={{ fontSize: 16 }} />} label="Responsável">
+              <Typography fontSize={14} fontWeight={500}>
+                {tarefa.nomeResponsavel ?? tarefa.idResponsavel}
+              </Typography>
+            </InfoRow>
+          </>
+        )}
+
         {tarefa.linkMr && (
           <>
             <Divider />
             <InfoRow icon={<OpenInNew sx={{ fontSize: 16 }} />} label="Link da MR">
               <Link
-                href={tarefa.linkMr}
+                href={normalizarUrl(tarefa.linkMr)}
                 target="_blank"
                 rel="noopener noreferrer"
                 fontSize={14}

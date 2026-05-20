@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Request
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../usuario/jwt-auth.guard";
 import { TarefaService } from "./tarefa.service";
@@ -40,5 +41,10 @@ export class TarefaController {
     @Param("idProjeto", ParseUUIDPipe) idProjeto: string,
   ): Promise<Tarefa[]> {
     return this.tarefaService.listarTarefasEmProjetos(idProjeto);
+  }
+
+  @Get('minhas')
+  listarMinhasTarefas(@Request() req: any): Promise<Tarefa[]> {
+    return this.tarefaService.listarTarefasPorResponsavel(req.user.id);
   }
 }

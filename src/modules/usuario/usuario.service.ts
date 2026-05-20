@@ -53,20 +53,16 @@ export class UsuarioService {
     const usuario = await this.usuarioRepository.findOne({
       where: { email: dto.email },
     });
-
     if (!usuario) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
-
     const senhaValida = await bcrypt.compare(dto.senha, usuario.senhaHash);
-
     if (!senhaValida) {
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
-    const payload = { sub: usuario.id, email: usuario.email };
+    const payload = { sub: usuario.id, email: usuario.email, nome: usuario.nome };
     const accessToken = this.jwtService.sign(payload);
-
     return { accessToken };
   }
 

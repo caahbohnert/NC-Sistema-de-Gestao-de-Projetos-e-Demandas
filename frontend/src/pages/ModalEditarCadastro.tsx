@@ -47,17 +47,23 @@ export function ModalEditarCadastro({
   async function handleSalvar() {
     if (!usuario) return;
 
+    if (!nome.trim()) {
+      setErro('O nome não pode ficar em branco.');
+      return;
+    }
+    if (!email.trim()) {
+      setErro('O e-mail não pode ficar em branco.');
+      return;
+    }
+
     setLoading(true);
     setErro(null);
-
     try {
       const dto: Record<string, string> = { nome, email };
       if (senha) dto.senha = senha;
-
       await atualizarCadastro(usuario.id, dto);
 
-      setUser((prev) => (prev ? { ...prev, nome, email } : prev));
-
+      setUser((prev) => (prev ? { ...prev, name: nome, email } : prev));
       onAtualizado?.(nome);
       onClose();
     } catch {

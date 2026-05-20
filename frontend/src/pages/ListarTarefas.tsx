@@ -42,6 +42,14 @@ const PRIORIDADE_LABEL: Record<string, string> = {
   CRITICA: "Crítica",
 };
 
+const PRIORIDADE_OPTIONS = [
+  { value: "ALL", label: "Todas" },
+  { value: "BAIXA", label: "Baixa" },
+  { value: "MEDIA", label: "Média" },
+  { value: "ALTA", label: "Alta" },
+  { value: "CRITICA", label: "Crítica" },
+];
+
 interface Props {
   tarefas: Tarefa[];
   loading: boolean;
@@ -54,9 +62,10 @@ export function ListaTarefas({ tarefas, loading, onMover, onEditar, onVerDetalhe
   const [filtro, setFiltro] = useState<Status | "ALL">("ALL");
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [tarefaSelecionada, setTarefaSelecionada] = useState<string | null>(null);
-
-  const tarefasFiltradas =
-    filtro === "ALL" ? tarefas : tarefas.filter((t) => t.status === filtro);
+  const [filtroPrioridade, setFiltroPrioridade] = useState<string | "ALL">("ALL");
+  const tarefasFiltradas = tarefas
+    .filter((t) => filtro === "ALL" || t.status === filtro)
+    .filter((t) => filtroPrioridade === "ALL" || t.prioridade === filtroPrioridade);
 
   function handleMenuOpen(e: React.MouseEvent<HTMLElement>, id: string) {
     e.stopPropagation();
@@ -79,7 +88,7 @@ export function ListaTarefas({ tarefas, loading, onMover, onEditar, onVerDetalhe
 
   return (
     <Box>
-      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+      <Box sx={{ display: "flex", gap: 1, mb: 1, flexWrap: "wrap" }}>
         {STATUS_OPTIONS.map((opt) => (
           <Chip
             key={opt.value}
@@ -101,6 +110,42 @@ export function ListaTarefas({ tarefas, loading, onMover, onEditar, onVerDetalhe
           />
         ))}
       </Box>
+
+        <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+          {PRIORIDADE_OPTIONS.map((opt) => (
+            <Chip
+              key={opt.value}
+              label={
+                opt.value === "ALL"
+                  ? `Prioridade: Todas`
+                  : PRIORIDADE_LABEL[opt.value]
+              }
+              onClick={() => setFiltroPrioridade(opt.value)}
+              variant={filtroPrioridade === opt.value ? "filled" : "outlined"}
+              size="small"
+              sx={{
+                cursor: "pointer",
+                fontWeight: filtroPrioridade === opt.value ? 600 : 400,
+                bgcolor:
+                  filtroPrioridade === opt.value && opt.value !== "ALL"
+                    ? `${PRIORIDADE_COLOR[opt.value]}22`
+                    : filtroPrioridade === opt.value
+                    ? "action.selected"
+                    : "transparent",
+                color:
+                  filtroPrioridade === opt.value && opt.value !== "ALL"
+                    ? PRIORIDADE_COLOR[opt.value]
+                    : filtroPrioridade === opt.value
+                    ? "text.primary"
+                    : "text.secondary",
+                borderColor:
+                  filtroPrioridade === opt.value && opt.value !== "ALL"
+                    ? PRIORIDADE_COLOR[opt.value]
+                    : "divider",
+              }}
+            />
+          ))}
+        </Box>
 
       {loading ? (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

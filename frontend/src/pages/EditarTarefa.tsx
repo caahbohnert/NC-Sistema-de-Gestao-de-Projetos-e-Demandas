@@ -28,6 +28,8 @@ export function ModalEditarTarefa({ open, tarefa, onClose, onConfirm }: Props) {
   const [dataLimite, setDataLimite] = useState("");
   const [linkMr, setLinkMr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [usuarios, setUsuarios] = useState<{ id: string; nome: string }[]>([]);
+  const [idResponsavel, setIdResponsavel] = useState('');
 
   useEffect(() => {
     if (tarefa) {
@@ -37,6 +39,7 @@ export function ModalEditarTarefa({ open, tarefa, onClose, onConfirm }: Props) {
       setPrioridade(tarefa.prioridade ?? "");
       setDataLimite(tarefa.dataLimite ?? "");
       setLinkMr(tarefa.linkMr ?? "");
+      setIdResponsavel(tarefa.idResponsavel ?? '');
     }
   }, [tarefa]);
 
@@ -53,6 +56,7 @@ export function ModalEditarTarefa({ open, tarefa, onClose, onConfirm }: Props) {
       dataLimite: dataLimite || undefined,
       linkMr: linkMr || undefined,
       idProjeto: tarefa.idProjeto,
+      idResponsavel: idResponsavel || undefined,
     });
 
     setLoading(false);
@@ -119,7 +123,21 @@ export function ModalEditarTarefa({ open, tarefa, onClose, onConfirm }: Props) {
             <MenuItem value="CRITICA">Crítica</MenuItem>
           </Select>
         </FormControl>
-
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Responsável</InputLabel>
+          <Select
+            value={idResponsavel}
+            label="Responsável"
+            onChange={(e) => setIdResponsavel(e.target.value)}
+          >
+            <MenuItem value="">Nenhum</MenuItem>
+            {usuarios.map((u) => (
+              <MenuItem key={u.id} value={u.id}>
+                {u.nome}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Data limite"
           type="date"

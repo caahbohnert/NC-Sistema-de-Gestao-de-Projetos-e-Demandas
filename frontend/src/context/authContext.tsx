@@ -19,13 +19,13 @@ interface AuthContextProps {
 
 function getUserFromToken(token: string): Usuario | null {
   try {
-    const decoded = jwtDecode<{ sub: string; email: string; name?: string }>(
+    const decoded = jwtDecode<{ sub: string; email: string; nome?: string }>(
       token,
     );
     return {
       id: decoded.sub,
       email: decoded.email,
-      name: decoded.name ?? 'Usuário',
+      name: decoded.nome ?? 'Usuário',
     };
   } catch {
     return null;

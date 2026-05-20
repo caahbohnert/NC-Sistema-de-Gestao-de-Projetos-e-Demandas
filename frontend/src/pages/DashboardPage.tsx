@@ -87,6 +87,16 @@ export function DashboardPage() {
 
   async function handleSalvarCadastro() {
     if (!user?.id) return;
+
+    if (!cadastroNome.trim()) {
+      setCadastroErro('O nome não pode ficar em branco.');
+      return;
+    }
+    if (!cadastroEmail.trim()) {
+      setCadastroErro('O e-mail não pode ficar em branco.');
+      return;
+    }
+
     setCadastroLoading(true);
     setCadastroErro(null);
 
@@ -95,16 +105,11 @@ export function DashboardPage() {
         nome: cadastroNome,
         email: cadastroEmail,
       };
-
       if (cadastroSenha) dto.senha = cadastroSenha;
 
       await api.put(`/usuarios/${user.id}`, dto);
 
-      updateUser({
-        name: cadastroNome,
-        email: cadastroEmail,
-      });
-
+      updateUser({ name: cadastroNome, email: cadastroEmail });
       setModalEditarCadastro(false);
     } catch {
       setCadastroErro('Não foi possível atualizar o cadastro.');
@@ -259,7 +264,7 @@ export function DashboardPage() {
               }}
               onClick={handleAbrirEditarCadastro}
             >
-              {user?.name?.[0]?.toUpperCase() ?? 'U'}{' '}
+              {user?.name?.[0]?.toUpperCase() ?? 'U'}
             </Avatar>
           </Tooltip>
           <Typography
@@ -269,7 +274,7 @@ export function DashboardPage() {
             sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}
             onClick={handleAbrirEditarCadastro}
           >
-            {user?.name ?? 'Usuário'}{' '}
+            {user?.name ?? 'Usuário'}
           </Typography>
           <Tooltip title="Sair">
             <IconButton
