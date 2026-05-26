@@ -23,8 +23,8 @@ export class UsuarioService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async listarUsuarios(): Promise<Usuario[]> {
-        return this.usuarioRepository.find();
+  async listarUsuarios(): Promise<Pick<Usuario, 'id' | 'nome'>[]> {
+    return this.usuarioRepository.find({ select: ['id', 'nome'] });
   }
 
   async criarUsuario(dto: CriarUsuarioDto): Promise<Omit<Usuario, 'senhaHash'>> {

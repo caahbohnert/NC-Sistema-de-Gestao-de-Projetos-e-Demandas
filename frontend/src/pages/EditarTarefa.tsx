@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { Status, Tarefa } from "../types";
+import { usuarioService } from "../services/dashboardservice";
 
 interface Props {
   open: boolean;
@@ -42,6 +43,15 @@ export function ModalEditarTarefa({ open, tarefa, onClose, onConfirm }: Props) {
       setIdResponsavel(tarefa.idResponsavel ?? '');
     }
   }, [tarefa]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    usuarioService
+      .listar()
+      .then(setUsuarios)
+      .catch(() => setUsuarios([]));
+  }, [open]);
 
   async function handleSubmit() {
     if (!tarefa) return;

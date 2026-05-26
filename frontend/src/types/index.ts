@@ -4,6 +4,7 @@ export interface Projeto {
   descricao?: string;
   dataInicio: string;
   dataFim: string;
+  idCriador: string;
 }
 
 export interface Tarefa {

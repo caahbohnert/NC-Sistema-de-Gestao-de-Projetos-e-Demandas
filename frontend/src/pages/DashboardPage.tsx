@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, FolderOpen, Logout } from '@mui/icons-material';
+import { Add, Edit, FolderOpen, Logout } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 import { projetoService, tarefaService } from '../services/dashboardservice';
@@ -44,6 +44,7 @@ export function DashboardPage() {
 
   const [modalProjeto, setModalProjeto] = useState(false);
   const [modalTarefa, setModalTarefa] = useState(false);
+  const [projetoEmEdicao, setProjetoEmEdicao] = useState<Projeto | null>(null);
 
   const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null);
 
@@ -135,6 +136,7 @@ export function DashboardPage() {
     descricao?: string;
     status: Status;
     prioridade: string;
+    idResponsavel?: string;
   }) {
     if (!projetoAtivo) return;
     const nova = await tarefaService.criar({
@@ -143,6 +145,40 @@ export function DashboardPage() {
     });
     setTarefas((prev) => [...prev, nova]);
     setModalTarefa(false);
+  }
+
+  async function handleAtualizarProjeto(id: string, dto: {
+    nome: string;
+    descricao?: string;
+    dataInicio: string;
+    dataFim: string;
+  }) {
+    const atualizado = await projetoService.atualizar(id, dto);
+    setProjetos((prev) => prev.map((p) => (p.id === id ? atualizado : p)));
+    if (projetoAtivo?.id === id) {
+      setProjetoAtivo(atualizado);
+    }
+    setModalProjeto(false);
+    setProjetoEmEdicao(null);
+  }
+
+  function handleEditarProjeto(projeto: Projeto) {
+    setProjetoEmEdicao(projeto);
+    setModalProjeto(true);
+  }
+
+  function handleCriarProjeto(dto: {
+    nome: string;
+    descricao?: string;
+    dataInicio: string;
+    dataFim: string;
+  }) {
+    return projetoService.criar(dto).then((novo) => {
+      setProjetos((prev) => [...prev, novo]);
+      setProjetoAtivo(novo);
+      setModalProjeto(false);
+      setProjetoEmEdicao(null);
+    });
   }
 
   async function handleMoverTarefa(id: string, status: Status) {
@@ -231,15 +267,35 @@ export function DashboardPage() {
                   key={p.id}
                   selected={projetoAtivo?.id === p.id}
                   onClick={() => setProjetoAtivo(p)}
-                  sx={{ borderRadius: 1, mb: 0.3 }}
+                  sx={{
+                    borderRadius: 1,
+                    mb: 0.3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
                 >
-                  <ListItemIcon sx={{ minWidth: 32 }}>
-                    <FolderOpen sx={{ fontSize: 16 }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={p.nome}
-                    primaryTypographyProps={{ fontSize: 13, noWrap: true }}
-                  />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <FolderOpen sx={{ fontSize: 16 }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={p.nome}
+                      primaryTypographyProps={{ fontSize: 13, noWrap: true }}
+                    />
+                  </Box>
+                  {user?.id === p.idCriador && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditarProjeto(p);
+                      }}
+                      sx={{ ml: 0.5 }}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
                 </ListItemButton>
               ))}
 
@@ -462,8 +518,29 @@ export function DashboardPage() {
 
       <ModalNovoProjeto
         open={modalProjeto}
-        onClose={() => setModalProjeto(false)}
-        onConfirm={handleCriarProjeto}
+        onClose={() => {
+          setModalProjeto(false);
+          setProjetoEmEdicao(null);
+        }}
+        onConfirm={async (dto) => {
+          if (projetoEmEdicao) {
+            await handleAtualizarProjeto(projetoEmEdicao.id, dto);
+          } else {
+            await handleCriarProjeto(dto);
+          }
+        }}
+        initialValues={
+          projetoEmEdicao
+            ? {
+                nome: projetoEmEdicao.nome,
+                descricao: projetoEmEdicao.descricao,
+                dataInicio: projetoEmEdicao.dataInicio,
+                dataFim: projetoEmEdicao.dataFim,
+              }
+            : undefined
+        }
+        title={projetoEmEdicao ? "Editar Projeto" : "Novo Projeto"}
+        submitLabel={projetoEmEdicao ? "Salvar" : "Criar"}
       />
 
       <ModalNovaTarefa

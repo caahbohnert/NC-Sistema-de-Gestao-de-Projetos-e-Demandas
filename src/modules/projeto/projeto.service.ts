@@ -4,6 +4,7 @@ import { Projeto } from "./entities/projeto.entity";
 import { Repository } from "typeorm";
 import { CriarProjetoDto } from "./dtos/cirar-projeto.dto";
 import { AtualizarProjetoDto } from "./dtos/atualizar-projeto.dto";
+import { Tarefa } from "../tarefa/entities/tarefa.entity";
 
 
 @Injectable()
@@ -35,7 +36,7 @@ export class ProjetoService {
     async listarProjetos(idUsuario: string): Promise<Projeto[]> {
     const comoMembro = await this.projetoRepository
         .createQueryBuilder('projeto')
-        .leftJoin('tarefas', 'tarefa', 'tarefa.idProjeto = projeto.id')
+        .leftJoin(Tarefa, 'tarefa', 'tarefa.idProjeto = projeto.id')
         .where('projeto.idCriador = :idUsuario', { idUsuario })
         .orWhere('tarefa.idResponsavel = :idUsuario', { idUsuario })
         .distinct(true)

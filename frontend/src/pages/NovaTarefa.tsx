@@ -10,7 +10,8 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usuarioService } from "../services/dashboardservice";
 import type { Status } from "../types";
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
     status: Status;
     prioridade: string;
     dataLimite?: string;
+    idResponsavel?: string;
   }) => Promise<void>;
 }
 
@@ -31,11 +33,29 @@ export function ModalNovaTarefa({ open, onClose, onConfirm }: Props) {
   const [status, setStatus] = useState<Status>("PENDENTE");
   const [prioridade, setPrioridade] = useState("MEDIA");
   const [dataLimite, setDataLimite] = useState("");
+  const [idResponsavel, setIdResponsavel] = useState("");
+  const [usuarios, setUsuarios] = useState<{ id: string; nome: string }[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+
+    usuarioService
+      .listar()
+      .then(setUsuarios)
+      .catch(() => setUsuarios([]));
+  }, [open]);
 
   async function handleSubmit() {
     setLoading(true);
-    await onConfirm({ titulo, descricao, status, prioridade, dataLimite: dataLimite || undefined });
+    await onConfirm({
+      titulo,
+      descricao,
+      status,
+      prioridade,
+      dataLimite: dataLimite || undefined,
+      idResponsavel: idResponsavel || undefined,
+    });
     setLoading(false);
     reset();
   }
@@ -46,6 +66,7 @@ export function ModalNovaTarefa({ open, onClose, onConfirm }: Props) {
     setStatus("PENDENTE");
     setPrioridade("MEDIA");
     setDataLimite("");
+    setIdResponsavel("");
   }
 
   function handleClose() {
@@ -89,6 +110,21 @@ export function ModalNovaTarefa({ open, onClose, onConfirm }: Props) {
             <MenuItem value="MEDIA">Média</MenuItem>
             <MenuItem value="ALTA">Alta</MenuItem>
             <MenuItem value="CRITICA">Crítica</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Responsável</InputLabel>
+          <Select
+            value={idResponsavel}
+            label="Responsável"
+            onChange={(e) => setIdResponsavel(e.target.value)}
+          >
+            <MenuItem value="">Nenhum</MenuItem>
+            {usuarios.map((u) => (
+              <MenuItem key={u.id} value={u.id}>
+                {u.nome}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField

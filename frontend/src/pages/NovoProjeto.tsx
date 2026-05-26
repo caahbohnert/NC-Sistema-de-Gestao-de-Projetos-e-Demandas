@@ -6,7 +6,8 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { Projeto } from "../types";
 
 interface Props {
   open: boolean;
@@ -17,14 +18,32 @@ interface Props {
     dataInicio: string;
     dataFim: string;
   }) => Promise<void>;
+  initialValues?: Pick<Projeto, "nome" | "descricao" | "dataInicio" | "dataFim">;
+  title?: string;
+  submitLabel?: string;
 }
 
-export function ModalNovoProjeto({ open, onClose, onConfirm }: Props) {
+export function ModalNovoProjeto({
+  open,
+  onClose,
+  onConfirm,
+  initialValues,
+  title = "Novo Projeto",
+  submitLabel = "Criar",
+}: Props) {
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setNome(initialValues?.nome ?? "");
+    setDescricao(initialValues?.descricao ?? "");
+    setDataInicio(initialValues?.dataInicio ?? "");
+    setDataFim(initialValues?.dataFim ?? "");
+  }, [open, initialValues]);
 
   const dataInvalida = !!dataInicio && !!dataFim && dataFim < dataInicio;
   const disabled = !nome.trim() || !dataInicio || !dataFim || dataInvalida || loading;
@@ -51,7 +70,7 @@ export function ModalNovoProjeto({ open, onClose, onConfirm }: Props) {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 700, fontSize: 16 }}>Novo Projeto</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700, fontSize: 16 }}>{title}</DialogTitle>
       <DialogContent>
         <TextField
           label="Nome"
@@ -97,7 +116,7 @@ export function ModalNovoProjeto({ open, onClose, onConfirm }: Props) {
           disabled={disabled}
           onClick={handleSubmit}
         >
-          {loading ? "Criando..." : "Criar"}
+          {loading ? `${submitLabel}...` : submitLabel}
         </Button>
       </DialogActions>
     </Dialog>

@@ -39,8 +39,9 @@ export class TarefaController {
   @Get("projeto/:idProjeto")
   listarTarefasEmProjetos(
     @Param("idProjeto", ParseUUIDPipe) idProjeto: string,
+    @Request() req: any,
   ): Promise<Tarefa[]> {
-    return this.tarefaService.listarTarefasEmProjetos(idProjeto);
+    return this.tarefaService.listarTarefasEmProjetos(idProjeto, req.user.id);
   }
 
   @Get('minhas')

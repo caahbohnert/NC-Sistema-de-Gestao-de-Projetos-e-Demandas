@@ -5,6 +5,9 @@ import { Repository } from "typeorm";
 import { CriarTarefaDto } from "./dtos/criar-tarefa.dto";
 import { AtualizarTarefaDto } from "./dtos/atualizar-tarefa.dto";
 import { ProjetoService } from "../projeto/projeto.service";
+import { UsuarioService } from "../usuario/usuario.service";
+
+type TarefaComResponsavel = Tarefa & { nomeResponsavel?: string };
 
 @Injectable()
 export class TarefaService {
@@ -12,6 +15,7 @@ export class TarefaService {
     @InjectRepository(Tarefa)
     private readonly tarefaRepository: Repository<Tarefa>,
     private readonly projetoService: ProjetoService,
+    private readonly usuarioService: UsuarioService,
   ) {}
 
   async criarTarefa(dto: CriarTarefaDto): Promise<Tarefa> {
@@ -32,15 +36,47 @@ export class TarefaService {
     return this.tarefaRepository.save(tarefa);
   }
 
-  async listarTarefasEmProjetos(idProjeto: string): Promise<Tarefa[]> {
-    return this.tarefaRepository
-      .createQueryBuilder('tarefa')
-      .where('tarefa.idProjeto = :idProjeto', { idProjeto })
-      .orderBy('tarefa.dataCriacao', 'DESC')
-      .getMany();
+  private async preencherNomeResponsavel(tarefas: Tarefa[]): Promise<TarefaComResponsavel[]> {
+    const idsResponsavel = tarefas
+      .filter((t) => !!t.idResponsavel)
+      .map((t) => t.idResponsavel)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    if (idsResponsavel.length === 0) {
+      return tarefas;
+    }
+
+    const usuarios = await this.usuarioService.listarUsuarios();
+    const mapaResponsaveis = new Map(
+      usuarios
+        .filter((u) => idsResponsavel.includes(u.id))
+        .map((u) => [u.id, u.nome]),
+    );
+
+    return tarefas.map((t) => ({
+      ...t,
+      nomeResponsavel: t.idResponsavel ? mapaResponsaveis.get(t.idResponsavel) : undefined,
+    }));
   }
 
-  async listarTarefasPorResponsavel(idResponsavel: string): Promise<Tarefa[]> {
-    return this.tarefaRepository.find({ where: { idResponsavel } });
+  async listarTarefasEmProjetos(idProjeto: string, idUsuario: string): Promise<TarefaComResponsavel[]> {
+    const projeto = await this.projetoService.buscarPorId(idProjeto);
+
+    const query = this.tarefaRepository
+      .createQueryBuilder('tarefa')
+      .where('tarefa.idProjeto = :idProjeto', { idProjeto })
+      .orderBy('tarefa.dataCriacao', 'DESC');
+
+    if (projeto.idCriador !== idUsuario) {
+      query.andWhere('tarefa.idResponsavel = :idUsuario', { idUsuario });
+    }
+
+    const tarefas = await query.getMany();
+    return this.preencherNomeResponsavel(tarefas);
+  }
+
+  async listarTarefasPorResponsavel(idResponsavel: string): Promise<TarefaComResponsavel[]> {
+    const tarefas = await this.tarefaRepository.find({ where: { idResponsavel } });
+    return this.preencherNomeResponsavel(tarefas);
   }
 }
