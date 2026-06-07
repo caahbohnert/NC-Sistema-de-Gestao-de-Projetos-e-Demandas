@@ -1,26 +1,31 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { ProjetoModule } from './modules/projeto/projeto.module';
 import { TarefaModule } from './modules/tarefa/tarefa.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'root',
-      password: 'root',
-      database: 'gerenciadorProjetosDemandas',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
       autoLoadEntities: true,
       synchronize: true,
     }),
+
     UsuarioModule,
     ProjetoModule,
-    TarefaModule
+    TarefaModule,
   ],
 })
 export class AppModule {}
