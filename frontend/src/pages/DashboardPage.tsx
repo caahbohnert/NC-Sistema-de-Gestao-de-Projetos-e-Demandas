@@ -167,20 +167,6 @@ export function DashboardPage() {
     setModalProjeto(true);
   }
 
-  function handleCriarProjeto(dto: {
-    nome: string;
-    descricao?: string;
-    dataInicio: string;
-    dataFim: string;
-  }) {
-    return projetoService.criar(dto).then((novo) => {
-      setProjetos((prev) => [...prev, novo]);
-      setProjetoAtivo(novo);
-      setModalProjeto(false);
-      setProjetoEmEdicao(null);
-    });
-  }
-
   async function handleMoverTarefa(id: string, status: Status) {
     const tarefaAtual = tarefas.find((t) => t.id === id);
     if (!tarefaAtual) return;
