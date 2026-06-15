@@ -26,20 +26,31 @@ export const usuarioService = {
     api.get<{ id: string; nome: string }[]>("/usuarios").then((r) => r.data),
 };
 
+async function carregarUsuarios(): Promise<{ id: string; nome: string }[]> {
+  return usuarioService.listar();
+}
+
+function preencherNomeResponsavel(tarefa: Tarefa, usuarios: { id: string; nome: string }[]): Tarefa {
+  if (!tarefa.idResponsavel) {
+    return tarefa;
+  }
+  return {
+    ...tarefa,
+    nomeResponsavel: usuarios.find((u) => u.id === tarefa.idResponsavel)?.nome,
+  };
+}
+
 export const tarefaService = {
   listarPorProjeto: async (idProjeto: string): Promise<Tarefa[]> => {
     const [tarefas, usuarios] = await Promise.all([
       api.get<Tarefa[]>(`/tarefas/projeto/${idProjeto}`).then((r) => r.data),
-      api.get<{ id: string; nome: string }[]>("/usuarios").then((r) => r.data),
+      carregarUsuarios(),
     ]);
 
-    return tarefas.map((t) => ({
-      ...t,
-      nomeResponsavel: usuarios.find((u) => u.id === t.idResponsavel)?.nome,
-    }));
+    return tarefas.map((t) => preencherNomeResponsavel(t, usuarios));
   },
 
-  criar: (dto: {
+  criar: async (dto: {
     titulo: string;
     descricao?: string;
     status: Status;
@@ -48,10 +59,17 @@ export const tarefaService = {
     idResponsavel?: string;
     linkMr?: string;
     dataLimite?: string;
-  }): Promise<Tarefa> =>
-    api.post<Tarefa>("/tarefas", dto).then((r) => r.data),
+  }): Promise<Tarefa> => {
+    const response = await api.post<Tarefa>("/tarefas", dto);
+    const tarefa = response.data;
+    if (!tarefa.idResponsavel) {
+      return tarefa;
+    }
+    const usuarios = await carregarUsuarios();
+    return preencherNomeResponsavel(tarefa, usuarios);
+  },
 
-  atualizar: (
+  atualizar: async (
     id: string,
     dto: {
       titulo?: string;
@@ -63,6 +81,13 @@ export const tarefaService = {
       linkMr?: string;
       dataLimite?: string;
     }
-  ): Promise<Tarefa> =>
-    api.put<Tarefa>(`/tarefas/${id}`, dto).then((r) => r.data),
+  ): Promise<Tarefa> => {
+    const response = await api.put<Tarefa>(`/tarefas/${id}`, dto);
+    const tarefa = response.data;
+    if (!tarefa.idResponsavel) {
+      return tarefa;
+    }
+    const usuarios = await carregarUsuarios();
+    return preencherNomeResponsavel(tarefa, usuarios);
+  },
 };
