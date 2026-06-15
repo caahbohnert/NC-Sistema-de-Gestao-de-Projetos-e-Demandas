@@ -27,10 +27,17 @@ export const usuarioService = {
 };
 
 export const tarefaService = {
-  listarPorProjeto: (idProjeto: string): Promise<Tarefa[]> =>
-    api
-      .get<Tarefa[]>(`/tarefas/projeto/${idProjeto}`)
-      .then((r) => r.data),
+  listarPorProjeto: async (idProjeto: string): Promise<Tarefa[]> => {
+    const [tarefas, usuarios] = await Promise.all([
+      api.get<Tarefa[]>(`/tarefas/projeto/${idProjeto}`).then((r) => r.data),
+      api.get<{ id: string; nome: string }[]>("/usuarios").then((r) => r.data),
+    ]);
+
+    return tarefas.map((t) => ({
+      ...t,
+      nomeResponsavel: usuarios.find((u) => u.id === t.idResponsavel)?.nome,
+    }));
+  },
 
   criar: (dto: {
     titulo: string;
